@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field # type: ignore
 from typing import List, Dict
 import uuid
 from datetime import date, time
+from math import ceil
 
 app = FastAPI()
 
@@ -23,16 +24,16 @@ class Receipt(BaseModel):
 def calculate_points(receipt: Receipt) -> int:
     points = 0
 
-    #distinct characters    
+    #distinct characters
     points += sum(c.isalnum() for c in receipt.retailer)
-    
+
     #total based logic
     total_float = float(receipt.total)
     if total_float.is_integer():
         points += 50
     if total_float % 0.25 == 0:
         points += 25
-    
+
     #items in receipt
     points += (len(receipt.items) // 2) * 5
 
@@ -46,7 +47,7 @@ def calculate_points(receipt: Receipt) -> int:
         points += 6
 
     #Time is between 2 pm and 4 pm
-    if 14 < receipt.purchaseTime.hour < 16:
+    if 14 <= receipt.purchaseTime.hour < 16:
         points += 10
     
     return points
