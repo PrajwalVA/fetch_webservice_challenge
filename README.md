@@ -1,3 +1,17 @@
+# How to run:
+
+```
+docker build -t fetch-webservice .
+docker run -p 8000:8000 fetch-webservice
+```
+
+On another terminal:
+```
+pip install requests
+python request_tests.py
+```
+This will POST the given example JSON receipts as test inputs and GET the points as the output.
+
 # Receipt Processor
 
 Build a webservice that fulfils the documented API. The API is described below. A formal definition is provided 
