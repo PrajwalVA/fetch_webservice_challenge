@@ -7,12 +7,14 @@ from math import ceil
 
 app = FastAPI()
 
-receipts_db: Dict[str, int] = {}
+user_db: Dict[int, int] = {}
+receipts_db: Dict[str, dict] = {}
 
 # Receipt and Item Models (patterns taken from api.yml)
+
 class Item(BaseModel):
     shortDescription: str = Field(..., pattern=r"^[\w\s\-]+$")
-    price: str = Field(..., pattern=r"^\d+\.\d{2}$")
+    price: str = Field(..., pattern=r"^[\d+\.\d{2}]+$")
 
 class Receipt(BaseModel):
     retailer: str = Field(..., pattern=r"^[\w\s\-&]+$")
@@ -20,8 +22,10 @@ class Receipt(BaseModel):
     purchaseTime: time
     items: List[Item]
     total: str = Field(..., pattern=r"^\d+\.\d{2}$")
+    user: int
+    points: int = 0
 
-def calculate_points(receipt: Receipt) -> int:
+def calculate_points(receipt: Receipt, receipt_count: int) -> int:
     points = 0
 
     #distinct characters
@@ -49,20 +53,52 @@ def calculate_points(receipt: Receipt) -> int:
     #Time is between 2 pm and 4 pm
     if 14 <= receipt.purchaseTime.hour < 16:
         points += 10
-    
+
+    if receipt_count == 1:
+        points += 1000
+    if receipt_count == 2:
+        points+=500
+    if receipt_count >= 3:
+        points+=250
+
     return points
+
+
+# @app.get("/receipts/{id}/users")
+# async def get_user(id: str):
+#     receipt = receipts_db.get(id)
+#     if not receipt:
+#         raise HTTPException(status_code=404, detail=f"No receipt for {id}")
+#     return {"points": receipt.user}
+
+# #POST
+# @app.post("/receipts/{id}/users")
+# async def user_record(receipt: Receipt):
+#     if user_id not in user_db:
+#         user_id = str(uuid.uuid4())
+#         receipts = list(receipt)
+#         user_db[user_id] = receipts
+#     else:
+#         get_user()
+#         receipts = user_db.get(user_id)
+#         receipts.add(receipt)
+#         user_db[user_id] = receipts
+
 
 #POST
 @app.post("/receipts/process")
 async def process_receipt(receipt: Receipt):
     receipt_id = str(uuid.uuid4())
-    points = calculate_points(receipt)
-    receipts_db[receipt_id] = points
+    receipt_count = user_db.get(receipt.user, 1)
+    receipt.points = calculate_points(receipt, receipt_count)
+    user_db[receipt.user] = receipt_count + 1
+    receipts_db[receipt_id] = receipt
     return {"id": receipt_id}
 
 #GET
 @app.get("/receipts/{id}/points")
 async def get_points(id: str):
-    if id not in receipts_db:
+    receipt = receipts_db.get(id)
+    if not receipt:
         raise HTTPException(status_code=404, detail=f"No receipt for {id}")
-    return {"points": receipts_db[id]}
+    return {"points": receipt.points}

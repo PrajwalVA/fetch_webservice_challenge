@@ -2,6 +2,7 @@ import requests
 
 base_url = "http://localhost:8000"
 process_url = f"{base_url}/receipts/process"
+user_url = f"{base_url}/users"
 
 receipts = [
     {
@@ -23,10 +24,11 @@ receipts = [
             "price": "3.35"
             },{
             "shortDescription": "   Klarbrunn 12-PK 12 FL OZ  ",
-            "price": "12.00"
+            "price": "12"
             }
         ],
-        "total": "35.35"
+        "total": "35.35",
+        "user": "1"
     },
     {
         "retailer": "Walgreens",
@@ -36,7 +38,8 @@ receipts = [
             {"shortDescription": "Pepsi - 12-oz", "price": "1.25"},
             {"shortDescription": "Dasani", "price": "1.40"}
         ],
-        "total": "2.65"
+        "total": "2.65",
+         "user": "1"
     },
     {
         "retailer": "M&M Corner Market",
@@ -57,7 +60,8 @@ receipts = [
             "price": "2.25"
             }
         ],
-        "total": "9.00"
+        "total": "9.00",
+        "user": "2"
     },
     {
         "retailer": "Target",
@@ -66,7 +70,8 @@ receipts = [
         "items": [
             {"shortDescription": "Pepsi - 12-oz", "price": "1.25"}
         ],
-        "total": "1.25"
+        "total": "1.25",
+        "user": "2"
     }
 ]
 
